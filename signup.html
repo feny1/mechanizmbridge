@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/v4-shims.min.css">
+    <title>Mechanism Bridge Co.</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="assets/styles.css">
+    <!-- iconfav -->
+    <link rel="icon" href="/imgs/mechanismbridge.svg" type="image/png">
+</head>
+
+<body>
+    <header>
+        <div onclick="window.location.href='./'" class="logo">
+            <img src="imgs/mechanismbridge.svg" alt="">
+
+        </div>
+        <nav>
+            <ul class="nav-links">
+                <li><a href="./#why">لماذا ميكانزم بريدج؟</a></li>
+                <li><a href="./#how">كيفية التسجيل</a></li>
+                <li><a href="./#much">أرقامنا</a></li>
+                <li><a href="./#share">شاركنا</a></li>
+                <li><a href="./#about">عن ميكانزم بريدج</a></li>
+            </ul>
+        </nav>
+        <div class="actions">
+            <div class="signup" onclick="window.location.href='./signup.html'">تسجيل</div>
+            <div class="login" onclick="window.location.href='./login.html'">تسجيل دخول</div>
+        </div>
+        <div class="lang">
+            <div class="lang-ar">عربي</div>
+            <div class="lang-en">English</div>
+            <i class="icon fa fa-globe mx-1"></i>
+        </div>
+    </header>
+    <div class="hero signup">
+        <img class="bg" src="imgs/backgroundhero.png" alt="">
+        <form id="signin-form" action="">
+            <h1>انضم إلى ميكانزم بريدج</h1>
+            <h2>منصة متكاملة تربط الشركات برواد الأعمال والموردين لتقديم حلول تشغيلية وتمويلية مبتكرة تعزز النمو وتخلق
+                شراكات ناجحة</h2>
+            <div class="input-group">
+                <input id="username" type="text" placeholder="الاسم الكريم" required>
+                <input id="phone" type="text" placeholder="رقم الجوال +966" required>
+                <input id="commericalid" type="text" placeholder="رقم السجل التجاري" required>
+                <input id="city" type="text" placeholder="المدينة" required>
+                <div class="password-wrapper">
+                    <input onchange="passwordValidation()" id="password" type="password" placeholder="كلمة المرور"
+                        required>
+                    <i onclick="togglePassword('password', this)" class="fas fa-eye"></i>
+                </div>
+
+                <div class="password-wrapper">
+                    <input onchange="passwordValidation()" id="repassword" type="password"
+                        placeholder="إعادة كلمة المرور" required>
+                    <i onclick="togglePassword('repassword', this)" class="fas fa-eye"></i>
+                </div>
+
+                <h4 id="warning"></h4>
+            </div>
+
+            <div class="actions">
+                <div class="signup" onclick="handleSignup()">تسجيل</div>
+                <div class="login" onclick="window.location.href='./'">العودة</div>
+            </div>
+        </form>
+        <form class="otp hide">
+            <h4>ستصلك رسالة نصية برمز التحقق على رقم الجوال الذي أدخلته</h4>
+            <div class="otp-inputs">
+                <input type="text" maxlength="1" class="otp-input" required>
+                <input type="text" maxlength="1" class="otp-input" required>
+                <input type="text" maxlength="1" class="otp-input" required>
+                <input type="text" maxlength="1" class="otp-input" required>
+                <input type="text" maxlength="1" class="otp-input" required>
+                <input type="text" maxlength="1" class="otp-input" required>
+            </div>
+            <button type="button" class="resend-otp">إعادة إرسال الرمز</button>
+            <div class="actions">
+                <div class="signup" onclick="signup(otpCheck())">تأكيد</div>
+                <div class="login" onclick="window.location.href='./'">العودة</div>
+            </div>
+
+        </form>
+    </div>
+    <footer class="footer">
+        <div class="footer-content">
+            <p>جميع الحقوق محفوظة &copy; 2025 ميكانزم بريدج</p>
+            <ul class="social-links">
+                <li><a href="#"><i class="fab fa-facebook-f"></i></a></li>
+                <li><a href="#"><i class="fab fa-twitter"></i></a></li>
+                <li><a href="#"><i class="fab fa-instagram"></i></a></li>
+                <li><a href="#"><i class="fab fa-linkedin-in"></i></a></li>
+                <!-- whatsapp -->
+                <li><a href="https://api.whatsapp.com/send?phone=966542399527" target="_blank"><i
+                            class="fab fa-whatsapp"></i></a></li>
+            </ul>
+        </div>
+    </footer>
+    <script src="assets/script.js"></script>
+    <script src="assets/otp.js?asd"></script>
+    <script>
+        var global_otp = '';
+        async function handleSignup() {
+
+
+
+
+            const inputs = document.querySelectorAll('.input-group input');
+            const phoneInput = inputs[1].value;
+
+            // check if phone are not used before using the API
+            const isPhoneUsed = await checkPhoneNumber(phoneInput);
+            if (isPhoneUsed) {
+                alert('📱 رقم الجوال هذا مستخدم بالفعل. يرجى استخدام رقم آخر.');
+                return;
+            }
+            if (!phoneInput.startsWith('966')) {
+                alert('📱 أدخل رقم الجوال بصيغة 966xxxxxxxxx');
+                return;
+            }
+            if (!passwordValidation()) {
+                alert('❗️ يرجى التأكد من صحة كلمة المرور وإعادة المحاولة.');
+                return;
+            }
+
+            const otp = await sendWhatsAppOTP("+" + phoneInput);
+            if (otp) {
+                global_otp = otp; // Store the OTP for later verification
+                // Hide the signup form and show the OTP form
+                document.getElementById('signin-form').classList.add('hide');
+                document.querySelector('.otp').classList.remove('hide');
+
+                // make the resend button enabled after 5 minutes
+                let resendButton = document.querySelector('.resend-otp');
+                resendButton.disabled = true;
+                resendButton.textContent = 'إعادة إرسال الرمز (5 دقائق)';
+                let countdown = 300; // 5 minutes in seconds
+                const interval = setInterval(() => {
+                    countdown--;
+                    if (countdown <= 0) {
+                        clearInterval(interval);
+                        resendButton.disabled = false;
+                        resendButton.textContent = 'إعادة إرسال الرمز';
+                    } else {
+                        resendButton.textContent = `إعادة إرسال الرمز (${Math.floor(countdown / 60)}:${countdown % 60
+                            .toString().padStart(2, '0')})`;
+                    }
+                }, 1000);
+
+                // Add event listener to the resend button
+                document.querySelector('.resend-otp').addEventListener('click', async () => {
+                    const newOtp = await sendWhatsAppOTP("+" + phoneInput);
+                    global_otp = newOtp; // Update the global OTP
+                    if (newOtp) {
+                        alert('📱 تم إعادة إرسال رمز التحقق بنجاح.');
+                    } else {
+                        alert('❗️ فشل في إعادة إرسال رمز التحقق. يرجى المحاولة لاحقًا.');
+                    }
+                });
+            } else {
+                alert('❗️ فشل في إرسال رمز التحقق. يرجى المحاولة لاحقًا.');
+            }
+        }
+        // check password match, check password validation
+        function passwordValidation() {
+            const passwordEl = document.getElementById('password');
+            const repassword = document.getElementById('repassword').value;
+            const warningEl = document.getElementById('warning');
+            const password = passwordEl.value;
+
+            if (password.length < 8) {
+                passwordEl.setCustomValidity('كلمة المرور يجب أن تكون على الأقل 8 أحرف');
+                warningEl.textContent = 'كلمة المرور يجب أن تكون على الأقل 8 أحرف';
+                return false;
+            } else if (!/[A-Z]/.test(password)) {
+                passwordEl.setCustomValidity('كلمة المرور يجب أن تحتوي على حرف كبير واحد على الأقل');
+                warningEl.textContent = 'كلمة المرور يجب أن تحتوي على حرف كبير واحد على الأقل';
+                return false;
+            } else if (!/[a-z]/.test(password)) {
+                passwordEl.setCustomValidity('كلمة المرور يجب أن تحتوي على حرف صغير واحد على الأقل');
+                warningEl.textContent = 'كلمة المرور يجب أن تحتوي على حرف صغير واحد على الأقل';
+                return false;
+            } else if (!/[0-9]/.test(password)) {
+                passwordEl.setCustomValidity('كلمة المرور يجب أن تحتوي على رقم واحد على الأقل');
+                warningEl.textContent = 'كلمة المرور يجب أن تحتوي على رقم واحد على الأقل';
+                return false;
+            } else if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+                passwordEl.setCustomValidity('كلمة المرور يجب أن تحتوي على رمز خاص واحد على الأقل');
+                warningEl.textContent = 'كلمة المرور يجب أن تحتوي على رمز خاص واحد على الأقل';
+                return false;
+            } else if (password.length > 20) {
+                passwordEl.setCustomValidity('كلمة المرور لا يمكن أن تتجاوز 20 حرفًا');
+                warningEl.textContent = 'كلمة المرور لا يمكن أن تتجاوز 20 حرفًا';
+                return false;
+            } else if (password !== repassword) {
+                passwordEl.setCustomValidity('كلمة المرور غير متطابقة');
+                warningEl.textContent = 'كلمة المرور غير متطابقة';
+                return false;
+            } else {
+                passwordEl.setCustomValidity('');
+                warningEl.textContent = '';
+                return true; // Password is valid
+            }
+        }
+
+        function checkPhoneNumber(phone) {
+            fetch('actions/check_phone.php', {
+                method: 'POST',
+                body: new URLSearchParams({ phone })
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === 'exists') {
+                        return true; // Phone number is already used
+                    } else {
+                        return false; // Phone number is not used
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                });
+        } 
+
+        function signup(otpChecked) {
+            if(!otpChecked){
+                alert("الرمز المدخل خاطئ");
+                return;
+            }
+            const formData = new FormData();
+
+            formData.append('username', document.getElementById('username').value);
+            formData.append('phone', document.getElementById('phone').value);
+            formData.append('commericalid', document.getElementById('commericalid').value);
+            formData.append('city', document.getElementById('city').value);
+            formData.append('password', document.getElementById('password').value);
+            formData.append('repassword', document.getElementById('repassword').value);
+
+            fetch('actions/signin.php', {
+                method: 'POST',
+                body: formData
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        alert(data.message);
+                        window.location.href = './login.html';
+                    } else {
+                        alert(data.message);
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    alert('حدث خطأ أثناء الاتصال بالخادم');
+                });
+        }
+
+    </script>
+</body>
+
+</html>

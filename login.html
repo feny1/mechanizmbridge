@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/v4-shims.min.css">
+    <title>Mechanism Bridge Co.</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="assets/styles.css">
+    <!-- iconfav -->
+    <link rel="icon" href="/imgs/mechanismbridge.svg" type="image/png">
+</head>
+
+<body>
+    <header>
+        <div onclick="window.location.href='./'" class="logo">
+            <img src="imgs/mechanismbridge.svg" alt="">
+            <div class="logo-text">
+
+                <h1>Mechanism</h1>
+                <h2>Bridge</h2>
+            </div>
+        </div>
+        <nav>
+            <ul class="nav-links">
+                <li><a href="./#why">لماذا ميكانزم بريدج؟</a></li>
+                <li><a href="./#how">كيفية التسجيل</a></li>
+                <li><a href="./#much">أرقامنا</a></li>
+                <li><a href="./#share">شاركنا</a></li>
+                <li><a href="./#about">عن ميكانزم بريدج</a></li>
+            </ul>
+        </nav>
+        <div class="actions">
+            <div class="signup" onclick="window.location.href='./signup.html'">تسجيل</div>
+            <div class="login" onclick="window.location.href='./login.html'">تسجيل دخول</div>
+        </div>
+        <div class="lang">
+            <div class="lang-ar">عربي</div>
+            <div class="lang-en">English</div>
+            <i class="icon fa fa-globe mx-1"></i>
+        </div>
+    </header>
+    <div class="hero login">
+        <img class="bg" src="imgs/backgroundhero.png" alt="">
+        <form action="">
+            <div class="input-group">
+                <input type="text" placeholder="رقم الجوال" required>
+                <input type="password" placeholder="كلمة المرور" required>
+            </div>
+
+            <div class="actions">
+                <div class="signup" onclick="handleLogin()">تسجيل دخول</div>
+                <div class="login" onclick="window.location.href='./'">العودة</div>
+            </div>
+        </form>
+        <form class="otp hide">
+            <h4>ستصلك رسالة نصية برمز التحقق على رقم الجوال الذي أدخلته</h4>
+            <div class="otp-inputs">
+                <input type="text" maxlength="1" class="otp-input" required>
+                <input type="text" maxlength="1" class="otp-input" required>
+                <input type="text" maxlength="1" class="otp-input" required>
+                <input type="text" maxlength="1" class="otp-input" required>
+                <input type="text" maxlength="1" class="otp-input" required>
+                <input type="text" maxlength="1" class="otp-input" required>
+            </div>
+            <button type="button" class="resend-otp">إعادة إرسال الرمز</button>
+            <div class="actions">
+                <div class="signup" onclick="otpCheckAndLogin()">تأكيد</div>
+                <div class="login" onclick="window.location.href='./'">العودة</div>
+            </div>
+
+        </form>
+    </div>
+    <footer class="footer">
+        <div class="footer-content">
+            <p>جميع الحقوق محفوظة &copy; 2025 ميكانزم بريدج</p>
+            <ul class="social-links">
+                <li><a href="#"><i class="fab fa-facebook-f"></i></a></li>
+                <li><a href="#"><i class="fab fa-twitter"></i></a></li>
+                <li><a href="#"><i class="fab fa-instagram"></i></a></li>
+                <li><a href="#"><i class="fab fa-linkedin-in"></i></a></li>
+                <!-- whatsapp -->
+                <li><a href="https://api.whatsapp.com/send?phone=966542399527" target="_blank"><i
+                            class="fab fa-whatsapp"></i></a></li>
+            </ul>
+        </div>
+    </footer>
+    <script src="assets/script.js"></script>
+    <script src="assets/otp.js"></script>
+    <script>
+        let global_login_otp = '';
+        let phone = '';
+        let password = '';
+
+        async function handleLogin() {
+            phone = document.querySelector('.input-group input[type="text"]').value.trim();
+            password = document.querySelector('.input-group input[type="password"]').value.trim();
+
+            if (!phone || !password) {
+                alert('❗️ يرجى تعبئة الحقول');
+                return;
+            }
+
+            if (!phone.startsWith('966')) {
+                alert('📱 أدخل رقم الجوال بصيغة 966xxxxxxxxx');
+                return;
+            }
+
+            // تحقق من الهاتف وكلمة المرور أولاً
+            const valid = await checkCredentials(phone, password);
+            if (!valid) {
+                alert('❌ رقم الجوال أو كلمة المرور غير صحيحة.');
+                return;
+            }
+
+            // أرسل OTP
+            const otp = await sendWhatsAppOTP("+" + phone);
+            if (otp) {
+                global_login_otp = otp;
+
+                document.querySelector('.hero.login form').classList.add('hide');
+                document.querySelector('.otp').classList.remove('hide');
+
+                startResendCountdown();
+            } else {
+                alert('❗️ فشل في إرسال رمز التحقق. يرجى المحاولة لاحقًا.');
+            }
+        }
+
+        async function checkCredentials(phone, password) {
+            const formData = new FormData();
+            formData.append('phone', phone);
+            formData.append('password', password);
+
+            try {
+                const res = await fetch('actions/login_check.php', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await res.json();
+                return data.status === 'valid';
+            } catch (err) {
+                console.error(err);
+                return false;
+            }
+        }
+
+        function startResendCountdown() {
+            const resendButton = document.querySelector('.otp .resend-otp');
+            resendButton.disabled = true;
+            resendButton.textContent = 'إعادة إرسال الرمز (5 دقائق)';
+            let countdown = 300;
+
+            const interval = setInterval(() => {
+                countdown--;
+                if (countdown <= 0) {
+                    clearInterval(interval);
+                    resendButton.disabled = false;
+                    resendButton.textContent = 'إعادة إرسال الرمز';
+                } else {
+                    resendButton.textContent = `إعادة إرسال الرمز (${Math.floor(countdown / 60)}:${(countdown % 60).toString().padStart(2, '0')})`;
+                }
+            }, 1000);
+
+            resendButton.addEventListener('click', async () => {
+                const newOtp = await sendWhatsAppOTP("+" + phone);
+                global_login_otp = newOtp;
+                if (newOtp) {
+                    alert('📱 تم إعادة إرسال رمز التحقق بنجاح.');
+                } else {
+                    alert('❗️ فشل في إعادة إرسال رمز التحقق.');
+                }
+            });
+        }
+
+        function otpCheckAndLogin() {
+            const otpInputs = document.querySelectorAll('.otp-input');
+            let enteredOtp = '';
+            otpInputs.forEach(input => enteredOtp += input.value);
+
+            if (enteredOtp !== global_login_otp) {
+                alert('❌ رمز التحقق غير صحيح.');
+                return;
+            }
+
+            // تسجيل الدخول النهائي
+            localStorage.setItem(
+                'loggedin',
+                JSON.stringify({ phone, password })
+            );
+            window.location.href = './profile.html';
+        }
+    </script>
+
+
+
+</body>
+
+</html>
