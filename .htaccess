@@ -1,6 +1,9 @@
-# Disable caching for development
-<IfModule mod_headers.c>
-  Header set Cache-Control "no-cache, no-store, must-revalidate"
-  Header set Pragma "no-cache"
-  Header set Expires 0
-</IfModule>
+RewriteEngine On
+
+# إذا المستخدم كتب /page.php أعد توجيهه إلى /page
+RewriteCond %{THE_REQUEST} /([^\s]+)\.php [NC]
+RewriteRule ^ %1 [R=301,L]
+
+# إذا كتب بدون .php فعليًا شغّل الملف
+RewriteCond %{REQUEST_FILENAME}.php -f
+RewriteRule ^(.*)$ $1.php [L]
