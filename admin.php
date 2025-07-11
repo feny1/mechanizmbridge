@@ -1,8 +1,9 @@
 <?php
+
 session_start();
 
 // اضبط كلمة المرور هنا
-define('PAGE_PASSWORD', 'mechanism123');
+define('PAGE_PASSWORD', 'Mwed9@!kdfgM');
 
 // تحقق من جلسة تسجيل الدخول
 if (!isset($_SESSION['authorized'])) {
@@ -84,8 +85,21 @@ if (!isset($_SESSION['authorized'])) {
     </header>
     <div class="hero profile">
         <img src="imgs/transparent-th.png" alt="">
-        <h1>شكرا لك لتسجيلك معنا</h1>
-        <h2>سنتواصل معك لحظة بدء الفرص</h2>
+        <div class="users-list">
+    <h3>المستخدمون المسجلون:</h3>
+    <table id="users-table" style="margin:auto;text-align:center;border-collapse:collapse;">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>الاسم</th>
+                <th>الإيميل</th>
+                <th>الإجراءات</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+</div>
+
     </div>
     <footer class="footer">
         <div class="footer-content">
@@ -102,6 +116,60 @@ if (!isset($_SESSION['authorized'])) {
         </div>
     </footer>
     <script src="assets/script.js"></script>
+    <script>
+function loadUsers() {
+    fetch('./actions/get_users.php?action=getAll')
+        .then(res => res.json())
+        .then(data => {
+            const tbody = document.querySelector('#users-table tbody');
+            tbody.innerHTML = '';
+
+            if (data.status === 'success') {
+                data.data.forEach(user => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${user.id}</td>
+                        <td>${user.name}</td>
+                        <td>${user.email}</td>
+                        <td>
+                            <button onclick="showUser(${user.id})">تفاصيل</button>
+                            <button onclick="deleteUser(${user.id})">حذف</button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } else {
+                tbody.innerHTML = `<tr><td colspan="4">${data.message}</td></tr>`;
+            }
+        });
+}
+
+function showUser(id) {
+    fetch(`./actions/get_users.php?action=get&id=${id}`)
+        .then(res => res.json())
+        .then(data => {
+            if (data.status === 'success') {
+                alert(`ID: ${data.data.id}\nName: ${data.data.name}\nEmail: ${data.data.email}`);
+            } else {
+                alert(data.message);
+            }
+        });
+}
+
+function deleteUser(id) {
+    if (!confirm('هل أنت متأكد أنك تريد حذف هذا المستخدم؟')) return;
+
+    fetch(`./actions/get_users.php?action=delete&id=${id}`)
+        .then(res => res.json())
+        .then(data => {
+            alert(data.message);
+            loadUsers(); // أعد تحميل القائمة
+        });
+}
+
+// عند تحميل الصفحة
+window.onload = loadUsers;
+</script>
 
 </body>
 
