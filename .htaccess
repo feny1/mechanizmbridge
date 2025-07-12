@@ -1,9 +1,0 @@
-RewriteEngine On
-
-# إذا المستخدم كتب /page.php أعد توجيهه إلى /page
-RewriteCond %{THE_REQUEST} /([^\s]+)\.php [NC]
-RewriteRule ^ %1 [R=301,L]
-
-# إذا كتب بدون .php فعليًا شغّل الملف
-RewriteCond %{REQUEST_FILENAME}.php -f
-RewriteRule ^(.*)$ $1.php [L]

@@ -9,7 +9,7 @@ if (!isset($_SESSION['authorized'])) {
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (!empty($_POST['password']) && $_POST['password'] === PAGE_PASSWORD) {
             $_SESSION['authorized'] = true;
-            header("Location: " . $_SERVER['PHP_SELF']);
+            header("Location: ad.php");
             exit;
         } else {
             $error = "كلمة المرور خاطئة";
@@ -48,12 +48,35 @@ $response = ob_get_clean();
 
 $data = json_decode($response, true);
 
-$users = [];
-if ($data && $data['status'] === 'success') {
-    $users = $data['data'];
-} else {
-    $error = $data['message'] ?? 'خطأ غير معروف عند جلب المستخدمين';
-}
+$users = getAllUsers($mysqli)['data'];
+// $users = [
+//     [
+//         'id' => 1,
+//         'username' => 'أحمد محمد',
+//         'phone' => '0501234567',
+//         'commercial_id' => '1012345678',
+//         'created_at' => '2024-01-15 10:30:00',
+//         'city' => 'الرياض'
+//     ],
+//     [
+//         'id' => 2,
+//         'username' => 'سارة علي',
+//         'phone' => '0539876543',
+//         'commercial_id' => '1098765432',
+//         'created_at' => '2024-02-20 14:45:00',
+//         'city' => 'جدة'
+//     ],
+//     [
+//         'id' => 3,
+//         'username' => 'محمد عبد الله',
+//         'phone' => '0557654321',
+//         'commercial_id' => '1023456789',
+//         'created_at' => '2024-03-05 09:15:00',
+//         'city' => 'الدمام'
+//     ]
+// ];
+
+
 ?>
 
 <!DOCTYPE html>
@@ -86,7 +109,7 @@ if ($data && $data['status'] === 'success') {
         </div>
     </header>
 
-    <div class="hero profile">
+    <div class="hero admin">
         <img src="imgs/transparent-th.png" alt="">
         <div class="users-list">
             <h3>المستخدمون المسجلون:</h3>
@@ -95,16 +118,27 @@ if ($data && $data['status'] === 'success') {
                     <tr>
                         <th>ID</th>
                         <th>الاسم</th>
-                        <th>الإيميل</th>
+                        <th>رقم الجوال</th>
+                        <th>رقم السجل</th>
+                        <th>المدينة</th>
+                        <th>تاريخ التسجيل</th>
+                        <th></th>
                     </tr>
                 </thead>
                 <tbody>
-                    <?php if (!empty($users)): ?>
+
+                    <?php if (isset($users)): ?>
                         <?php foreach ($users as $user): ?>
                             <tr>
                                 <td><?= htmlspecialchars($user['id']) ?></td>
-                                <td><?= htmlspecialchars($user['name']) ?></td>
-                                <td><?= htmlspecialchars($user['email']) ?></td>
+                                <td><?= htmlspecialchars($user['username']) ?></td>
+                                <td><?= htmlspecialchars($user['phone']) ?></td>
+                                <td><?= htmlspecialchars($user['commercial_id']) ?></td>
+                                <td><?= htmlspecialchars($user['city']) ?></td>
+                                <td><?= htmlspecialchars($user['created_at']) ?></td>
+                                <td>
+                                    <button class="user-delete" data-id="<?= $user['id'] ?>">حذف</button>
+                                </td>
                             </tr>
                         <?php endforeach; ?>
                     <?php else: ?>
@@ -120,6 +154,34 @@ if ($data && $data['status'] === 'success') {
     <footer class="footer">
         <p>جميع الحقوق محفوظة &copy; 2025 ميكانزم بريدج</p>
     </footer>
+
+
+    <script src="assets/script.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            document.querySelectorAll(".user-delete").forEach(button => {
+                button.addEventListener("click", () => {
+                    const userId = button.getAttribute("data-id");
+                    if (confirm(`هل أنت متأكد أنك تريد حذف المستخدم رقم ${userId}؟`)) {
+                        fetch(`./actions/get_users.php?action=delete&id=${userId}`)
+                            .then(res => res.json())
+                            .then(data => {
+                                if (data.status === 'success') {
+                                    alert(`✅ ${data.message}`);
+                                    location.reload();
+                                } else {
+                                    alert(`❌ ${data.message}`);
+                                }
+                            })
+                            .catch(err => {
+                                alert("حدث خطأ أثناء الحذف");
+                            });
+                    }
+                });
+            });
+        });
+    </script>
+
 
 </body>
 
